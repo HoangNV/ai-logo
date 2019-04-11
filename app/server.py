@@ -7,11 +7,6 @@ from io import BytesIO
 
 from fastai import *
 from fastai.vision import *
-try:
-    import googleclouddebugger
-    googleclouddebugger.enable()
-except ImportError:
-      pass
 
 model_file_url = 'https://www.dropbox.com/s/k1inazaxtqtgiu3/logo-model-stage-2.pth?raw=1'
 model_file_name = 'model'
@@ -49,11 +44,13 @@ def index(request):
 
 @app.route('/analyze', methods=['POST'])
 async def analyze(request):
-    data = await request.form()
-    img_bytes = await (data['file'].read())
-    img = open_image(BytesIO(img_bytes))
-    return JSONResponse({'result': learn.predict(img)[0]})
-
+    try:
+        data = await request.form()
+        img_bytes = await (data['file'].read())
+        img = open_image(BytesIO(img_bytes))
+        return JSONResponse({'result': learn.predict(img)[0]})
+    except Exception as e:
+        return JSONResponse({'result': 'Oops, something wrong happended'})
 if __name__ == '__main__':
     if 'serve' in sys.argv: uvicorn.run(app, host='0.0.0.0', port=8080)
 
